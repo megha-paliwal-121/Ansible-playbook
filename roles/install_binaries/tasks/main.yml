@@ -1,0 +1,30 @@
+---
+- name: Copy binaries to managed nodes
+  copy:
+    src: "{{ item }}"
+    dest: "/usr/local/bin/"
+    mode: '0755'
+  loop:
+    - docker
+    - git
+    - helm
+    - kubectl
+    - node
+
+- name: Verify installation of binaries
+  command: "{{ item }} --version"
+  register: result
+  loop:
+    - docker
+    - git
+    - helm
+    - kubectl
+    - node
+  ignore_errors: yes
+
+- name: Display installation results
+  debug:
+    msg: "{{ item.stdout }}"
+  loop: "{{ result.results }}"
+  when: item.rc == 0
+

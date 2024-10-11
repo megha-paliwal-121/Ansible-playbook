@@ -1,0 +1,6 @@
+---
+- name: Install binaries from GitHub repo
+  hosts: managed_nodes  # Replace with your group of managed nodes
+  roles:
+    - install_binaries
+
