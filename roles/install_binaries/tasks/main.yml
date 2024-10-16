@@ -1,30 +1,57 @@
 ---
-- name: Copy binaries to managed nodes
+- name: Copy Docker binaries to managed nodes
   copy:
-    src: "{{ item }}"
-    dest: "/usr/local/bin/"
-    mode: '0755'
+    src: files/docker/{{ item }}
+    dest: /usr/local/bin/{{ item }}
+    mode: "0755"
+    remote_src: no
   loop:
     - docker
-    - git
-    - helm
-    - kubectl
-    - node
-
-- name: Verify installation of binaries
-  command: "{{ item }} --version"
-  register: result
-  loop:
-    - docker
-    - git
-    - helm
-    - kubectl
-    - node
+    - dockerd
+    - containerd
+    - containerd-shim
+    - containerd-shim-runc-v2
+    - ctr
+    - docker-init
+    - docker-proxy
+    - runc
+  become: yes
   ignore_errors: yes
-
-- name: Display installation results
+- name: Verify Docker installation
+  command: /usr/local/bin/docker --version
+  register: result
+  ignore_errors: yes
+- name: Display Docker installation result
   debug:
-    msg: "{{ item.stdout }}"
-  loop: "{{ result.results }}"
-  when: item.rc == 0
+    msg: "{{ result.stdout }}"
+  when: result.rc == 0
+- name: Copy kubectl binary to managed nodes
+  copy:
+    src: files/kubectl
+    dest: /usr/local/bin/kubectl
+    mode: "0755"
+  become: yes
+- name: Verify kubectl installation
+  command: /usr/local/bin/kubectl version --client
+  register: result
+  ignore_errors: yes
+- name: Display kubectl installation result
+  debug:
+    msg: "{{ result.stdout }}"
+  when: result.rc == 0
+- name: Copy helm binary to managed nodes
+  copy:
+    src: files/linux-amd64/helm
+    dest: /usr/local/bin/helm
+    mode: "0755"
+  become: yes
+- name: Verify helm installation
+  command: /usr/local/bin/helm version
+  register: result
+  ignore_errors: yes
+- name: Display helm installation result
+  debug:
+    msg: "{{ result.stdout }}"
+  when: result.rc == 0
+
 
